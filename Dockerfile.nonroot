@@ -1,7 +1,5 @@
 FROM alpine:3.24
 
-LABEL org.opencontainers.image.authors="Release Engineering Team <devops@tech.wbsrv.ru>"
-
 RUN set -x \
      && apk add --no-cache ca-certificates curl \
      && curl -o /etc/apk/keys/angie-signing.rsa https://angie.software/keys/angie-signing.rsa \
@@ -11,7 +9,11 @@ RUN set -x \
      && ln -sf /dev/stdout /var/log/angie/access.log \
      && ln -sf /dev/stderr /var/log/angie/error.log
 
-RUN sed -i 's/listen       80;/listen       8080;/g' /etc/angie/http.d/default.conf
+COPY angie.conf /etc/angie/angie.conf
+
+RUN chown -R angie:angie /var/log/angie /var/lib/angie /var/cache/angie /etc/angie && \
+    touch /tmp/angie.pid && \
+    chown angie:angie /tmp/angie.pid
 
 USER angie
 
